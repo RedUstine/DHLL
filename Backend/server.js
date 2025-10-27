@@ -9,7 +9,7 @@ const fs = require("fs").promises; // Use promises for async file operations
 const app = express();
 const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
-const frontendBuildPath = path.join(__dirname, "../frontend/build");
+const frontendBuildPath = path.join(__dirname, "../Frontend/build");
 
 // --- Middleware ---
 app.use(cors());
@@ -91,14 +91,15 @@ if (process.env.NODE_ENV === "production") {
       console.log("✅ Frontend static serving enabled");
     })
     .catch(() => {
-      console.warn("⚠️ Frontend build folder not found. Skipping static serving.");
+      console.warn(
+        "⚠️ Frontend build folder not found. Skipping static serving."
+      );
     });
 } else {
   // In development, log if frontend build is missing
-  fs.access(frontendBuildPath)
-    .catch(() => {
-      console.warn("⚠️ Frontend build folder not found. Run frontend build.");
-    });
+  fs.access(frontendBuildPath).catch(() => {
+    console.warn("⚠️ Frontend build folder not found. Run frontend build.");
+  });
 }
 
 // --- Start Server ---
