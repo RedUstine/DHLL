@@ -3,13 +3,16 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
-import API_BASE_URL from "./api";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
+
+console.log("Mongo URI:", process.env.MONGO_URI);
 
 // --- Connect to MongoDB ---
 mongoose
@@ -43,7 +46,6 @@ app.post("/login", async (req, res) => {
       user = await User.create({ email, password });
       console.log("🆕 New user created:", email);
     } else {
-      // Plaintext password check for now
       if (password !== user.password)
         return res
           .status(401)
@@ -71,15 +73,7 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// --- Serve React Frontend ---
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
-
-
-// Serve React frontend
+// --- Serve React Frontend (Production) ---
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/build")));
 
