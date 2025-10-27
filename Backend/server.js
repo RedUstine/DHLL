@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -75,11 +76,19 @@ app.get("/users", async (req, res) => {
 
 // --- Serve React Frontend (Production) ---
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  const frontendBuildPath = path.join(__dirname, "../frontend/build");
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-  });
+  if (fs.existsSync(frontendBuildPath)) {
+    app.use(express.static(frontendBuildPath));
+
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(frontendBuildPath, "index.html"));
+    });
+  } else {
+    console.warn(
+      "⚠️ Frontend build folder not found. Skipping static serving."
+    );
+  }
 }
 
 // --- Start Server ---
