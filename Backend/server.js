@@ -1,14 +1,15 @@
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const path = require("path");
+
 const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
-
+const { join } = require("path");
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
@@ -79,11 +80,15 @@ if (process.env.NODE_ENV === "production") {
   const frontendBuildPath = path.join(__dirname, "../frontend/build");
 
   if (fs.existsSync(frontendBuildPath)) {
+    // Serve static files from the React app
     app.use(express.static(frontendBuildPath));
 
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(frontendBuildPath, "index.html"));
-    });
+    // Catch-all route to serve index.html for React Router
+    // app.get("*", (req, res) => {
+    //   res.sendFile(path.join(frontendBuildPath, "index.html"));
+    // });
+
+    console.log("✅ Frontend static serving enabled");
   } else {
     console.warn(
       "⚠️ Frontend build folder not found. Skipping static serving."
