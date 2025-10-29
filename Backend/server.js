@@ -8,7 +8,7 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
-const frontendBuildPath = path.join(__dirname, "../Frontend/build");
+const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // --- Middleware ---
 app.use(cors());
