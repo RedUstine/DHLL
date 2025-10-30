@@ -10,43 +10,62 @@ const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 
 
-// ✅ Use CORS middleware first, before routes
+
+
+const cors = require("cors");
+
 const allowedOrigins = [
-  "https://dhll-1.onrender.com",
-  "http://localhost:3000"
+  "https://dhll-1.onrender.com",   // ✅ your frontend on Render
+  "http://localhost:3000"          // ✅ for local dev
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// ✅ Handle preflight requests explicitly
+app.options("*", cors());
+
+// ✅ Use CORS middleware first, before routes
+// const allowedOrigins = [
+//   "https://dhll-1.onrender.com",
+//   "http://localhost:3000"
+// ];
+
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+//   if (allowedOrigins.includes(origin)) {
+//     res.header("Access-Control-Allow-Origin", origin);
+//   }
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.header("Access-Control-Allow-Credentials", "true");
+
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+//   next();
+// });
 
 // OR use cors() library directly
 // app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // --- Middleware ---
 app.use(express.json());
-app.use(
-  cors({
-    origin: [
-      "https://dhll-1.onrender.com",     // ✅ your actual frontend Render URL
-      "https://dhll-frontend.onrender.com", // (optional if you had another)
-      "http://localhost:3000"             // ✅ local dev
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: [
+//       "https://dhll-1.onrender.com",     // ✅ your actual frontend Render URL
+//       "https://dhll-frontend.onrender.com", // (optional if you had another)
+//       "http://localhost:3000"             // ✅ local dev
+//     ],
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//   })
+// );
 
 
 console.log("Mongo URI:", process.env.MONGO_URI);
