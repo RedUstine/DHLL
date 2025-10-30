@@ -1,21 +1,21 @@
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 1000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
+const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
-
-
-
-app.use(express.json());
-
+// -----------------------------------------
+// ✅ CORS Configuration
+// -----------------------------------------
 const allowedOrigins = [
-  "https://dhll-1.onrender.com",   // your frontend URL
-  "http://localhost:3000"          // local dev
+  "https://dhll-1.onrender.com", // your frontend (Render)
+  "http://localhost:3000"        // local development
 ];
 
 app.use(cors({
@@ -23,6 +23,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -31,68 +32,38 @@ app.use(cors({
   credentials: true,
 }));
 
-// ✅ explicitly handle preflight requests
+// ✅ Explicitly handle preflight OPTIONS requests
 app.options("*", cors());
 
+// -----------------------------------------
+// ✅ Middleware
+// -----------------------------------------
+app.use(express.json());
 
-// ✅ Use CORS middleware first, before routes
-// const allowedOrigins = [
-//   "https://dhll-1.onrender.com",
-//   "http://localhost:3000"
-// ];
-
-// app.use((req, res, next) => {
-//   const origin = req.headers.origin;
-//   if (allowedOrigins.includes(origin)) {
-//     res.header("Access-Control-Allow-Origin", origin);
-//   }
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   res.header("Access-Control-Allow-Credentials", "true");
-
-//   if (req.method === "OPTIONS") {
-//     return res.sendStatus(200);
-//   }
-//   next();
-// });
-
-// OR use cors() library directly
-// app.use(cors({ origin: allowedOrigins, credentials: true }));
-
-// --- Middleware ---
-
-// app.use(
-//   cors({
-//     origin: [
-//       "https://dhll-1.onrender.com",     // ✅ your actual frontend Render URL
-//       "https://dhll-frontend.onrender.com", // (optional if you had another)
-//       "http://localhost:3000"             // ✅ local dev
-//     ],
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true,
-//   })
-// );
-
-
+// -----------------------------------------
+// ✅ MongoDB Connection
+// -----------------------------------------
 console.log("Mongo URI:", process.env.MONGO_URI);
-
-// --- Connect MongoDB ---
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
-// --- Schema & Model ---
+// -----------------------------------------
+// ✅ Mongoose User Model
+// -----------------------------------------
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }, // NOTE: For demo only — hash in production
   },
   { timestamps: true }
 );
 const User = mongoose.model("User", userSchema);
 
-// --- API Routes ---
+// -----------------------------------------
+// ✅ API Routes
+// -----------------------------------------
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -104,7 +75,7 @@ app.post("/login", async (req, res) => {
     if (!user) {
       user = await User.create({ email, password });
       console.log("🆕 New user created:", email);
-    } else if (password !== user.password) {
+    } else if (user.password !== password) {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
@@ -129,16 +100,21 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// --- Serve React build ---
-const frontendBuildPath = path.join(__dirname, "../Frontend/build");
-app.use(express.static(frontendBuildPath));
+// -----------------------------------------
+// ✅ Serve React Frontend (for production)
+// -----------------------------------------
+if (process.env.NODE_ENV === "production") {
+  console.log("✅ Serving frontend build...");
+  app.use(express.static(frontendBuildPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(frontendBuildPath, "index.html"));
+  });
+}
 
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(frontendBuildPath, "index.html"));
-});
-console.log("Allowed Origins:", allowedOrigins);
-
-// --- Start Server ---
+// -----------------------------------------
+// ✅ Start Server
+// -----------------------------------------
 app.listen(PORT, () => {
+  console.log("Allowed Origins:", allowedOrigins);
   console.log(`🚀 Server running on ${API_BASE_URL}`);
 });
