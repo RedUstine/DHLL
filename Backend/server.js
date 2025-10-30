@@ -13,30 +13,29 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 // -----------------------------------------
 // ✅ CORS Configuration
 // -----------------------------------------
+
+// ✅ 1. Correct CORS setup
 const allowedOrigins = [
-  "https://dhll-nobx.onrender.com", // your frontend on Render
-  "http://localhost:3000"           // for local dev
+  "https://dhll-nobx.onrender.com",
+  "http://localhost:3000"
 ];
 
-// -----------------------------------------
-// ✅ CORS Setup (Always include before routes)
-// -----------------------------------------
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // handle preflight
-  }
-
-  next();
-});
-
+// ✅ 2. Handle OPTIONS (preflight) explicitly
+app.options("*", cors());
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     if (!origin || allowedOrigins.includes(origin)) {
