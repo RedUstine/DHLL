@@ -16,8 +16,8 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // ✅ 1. Correct CORS setup
 const allowedOrigins = [
-  "https://dhll-nobx.onrender.com",
-  "http://localhost:3000"
+  "https://dhll-1.onrender.com", // ✅ correct frontend (from the error)
+  "http://localhost:3000"        // for local dev
 ];
 
 app.use(cors({
