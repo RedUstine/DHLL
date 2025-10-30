@@ -37,7 +37,10 @@ app.use((req, res, next) => {
 // ✅ Middleware
 // -----------------------------------------
 app.use(express.json());
-
+app.use(cors({
+  origin: "https://dhll-1.onrender.com",  // your frontend URL
+  credentials: true
+}));
 // -----------------------------------------
 // ✅ MongoDB Connection
 // -----------------------------------------
