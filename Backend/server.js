@@ -6,13 +6,22 @@ const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 1000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // --- Middleware ---
-app.use(cors());
+
 app.use(express.json());
+app.use(cors({
+  origin: [
+     "https://dhll-frontend.onrender.com", // ✅ actual Render frontend
+      "http://localhost:3000"        // ✅ local dev
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
+
 
 console.log("Mongo URI:", process.env.MONGO_URI);
 
@@ -63,7 +72,8 @@ app.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Server error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+   return res.status(500).json({ success: false, message: "Server error" });
+
   }
 });
 
