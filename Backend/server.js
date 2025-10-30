@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -10,13 +11,16 @@ const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // -----------------------------------------
-// ✅ CORS Setup (Explicit + Middleware)
+// ✅ CORS Configuration
 // -----------------------------------------
 const allowedOrigins = [
-  "https://dhll-1.onrender.com", // your frontend on Render
-  "http://localhost:3000"        // for local dev
+  "https://dhll-nobx.onrender.com", // your frontend on Render
+  "http://localhost:3000"           // for local dev
 ];
 
+// -----------------------------------------
+// ✅ CORS Setup (Always include before routes)
+// -----------------------------------------
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -27,20 +31,34 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // ✅ handle preflight immediately
+    return res.sendStatus(204); // handle preflight
   }
 
   next();
 });
 
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       console.log("❌ Blocked by CORS:", origin);
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//   credentials: true,
+// }));
+
+// ✅ Explicitly handle preflight OPTIONS requests
+app.options("*", cors());
+
 // -----------------------------------------
 // ✅ Middleware
 // -----------------------------------------
 app.use(express.json());
-// app.use(cors({
-//   origin: "https://dhll-1.onrender.com",  // your frontend URL
-//   credentials: true
-// }));
+
 // -----------------------------------------
 // ✅ MongoDB Connection
 // -----------------------------------------
@@ -56,7 +74,7 @@ mongoose
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }, // NOTE: For demo only — hash in production
   },
   { timestamps: true }
 );
@@ -68,8 +86,9 @@ const User = mongoose.model("User", userSchema);
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
+    if (!email || !password) {
       return res.status(400).json({ success: false, message: "Email and password required" });
+    }
 
     let user = await User.findOne({ email });
     if (!user) {
@@ -79,7 +98,11 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
-    res.json({ success: true, message: "Login successful", user: { id: user._id, email: user.email } });
+    res.json({
+      success: true,
+      message: "Login successful",
+      user: { id: user._id, email: user.email },
+    });
   } catch (err) {
     console.error("❌ Server error:", err);
     res.status(500).json({ success: false, message: "Server error" });
@@ -97,10 +120,10 @@ app.get("/users", async (req, res) => {
 });
 
 // -----------------------------------------
-// ✅ Serve Frontend Build in Production
+// ✅ Serve React Frontend (for production)
 // -----------------------------------------
 if (process.env.NODE_ENV === "production") {
-  console.log("✅ Serving React build...");
+  console.log("✅ Serving frontend build...");
   app.use(express.static(frontendBuildPath));
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(frontendBuildPath, "index.html"));
@@ -111,6 +134,6 @@ if (process.env.NODE_ENV === "production") {
 // ✅ Start Server
 // -----------------------------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on ${API_BASE_URL}`);
   console.log("Allowed Origins:", allowedOrigins);
+  console.log(`🚀 Server running on ${API_BASE_URL}`);
 });
