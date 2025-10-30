@@ -5,8 +5,34 @@ const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
+
+
+
+// ✅ Use CORS middleware first, before routes
+const allowedOrigins = [
+  "https://dhll-1.onrender.com",
+  "http://localhost:3000"
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// OR use cors() library directly
+// app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // --- Middleware ---
 app.use(express.json());
