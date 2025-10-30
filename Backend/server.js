@@ -11,23 +11,29 @@ const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 
 
-
-const cors = require("cors");
+app.use(express.json());
 
 const allowedOrigins = [
-  "https://dhll-1.onrender.com",   // ✅ your frontend on Render
-  "http://localhost:3000"          // ✅ for local dev
+  "https://dhll-1.onrender.com",   // your frontend URL
+  "http://localhost:3000"          // local dev
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
 
-// ✅ Handle preflight requests explicitly
+// ✅ explicitly handle preflight requests
 app.options("*", cors());
+
 
 // ✅ Use CORS middleware first, before routes
 // const allowedOrigins = [
@@ -54,7 +60,7 @@ app.options("*", cors());
 // app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // --- Middleware ---
-app.use(express.json());
+
 // app.use(
 //   cors({
 //     origin: [
@@ -130,6 +136,7 @@ app.use(express.static(frontendBuildPath));
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(frontendBuildPath, "index.html"));
 });
+console.log("Allowed Origins:", allowedOrigins);
 
 // --- Start Server ---
 app.listen(PORT, () => {
