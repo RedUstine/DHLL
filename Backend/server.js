@@ -10,14 +10,18 @@ const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 // --- Middleware ---
 app.use(express.json());
-app.use(cors({
-  origin: [
-    "https://dhll-frontend.onrender.com", // ✅ actual frontend Render app
-    "http://localhost:3000"               // ✅ local dev
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "https://dhll-1.onrender.com",     // ✅ your actual frontend Render URL
+      "https://dhll-frontend.onrender.com", // (optional if you had another)
+      "http://localhost:3000"             // ✅ local dev
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 
 console.log("Mongo URI:", process.env.MONGO_URI);
 
