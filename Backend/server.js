@@ -1,45 +1,40 @@
 require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 1000;
+const PORT = process.env.PORT || 10000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
-const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // --- Middleware ---
-
 app.use(express.json());
 app.use(cors({
   origin: [
-     "https://dhll-frontend.onrender.com", // ✅ actual Render frontend
-      "http://localhost:3000"        // ✅ local dev
+    "https://dhll-frontend.onrender.com", // ✅ actual frontend Render app
+    "http://localhost:3000"               // ✅ local dev
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
 
-
 console.log("Mongo URI:", process.env.MONGO_URI);
 
-// --- Connect to MongoDB ---
+// --- Connect MongoDB ---
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
-// --- User Model ---
+// --- Schema & Model ---
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }, // Consider hashing passwords
+    password: { type: String, required: true },
   },
   { timestamps: true }
 );
-
 const User = mongoose.model("User", userSchema);
 
 // --- API Routes ---
@@ -47,22 +42,15 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password required" });
+      return res.status(400).json({ success: false, message: "Email and password required" });
     }
 
     let user = await User.findOne({ email });
-
     if (!user) {
-      user = await User.create({ email, password }); // Consider hashing password
+      user = await User.create({ email, password });
       console.log("🆕 New user created:", email);
-    } else {
-      if (password !== user.password) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid password" });
-      }
+    } else if (password !== user.password) {
+      return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
     res.json({
@@ -72,8 +60,7 @@ app.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Server error:", err);
-   return res.status(500).json({ success: false, message: "Server error" });
-
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -87,16 +74,13 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// --- Serve React Frontend (Production) ---
-if (process.env.NODE_ENV === "production") {
-  console.log("✅ Frontend static serving enabled");
-  // Serve static files from the build directory
-  app.use(express.static(frontendBuildPath));
-  // For handling client-side routing, serve the index.html file
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(frontendBuildPath, "index.html"));
-  });
-}
+// --- Serve React build ---
+const frontendBuildPath = path.join(__dirname, "../Frontend/build");
+app.use(express.static(frontendBuildPath));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(frontendBuildPath, "index.html"));
+});
 
 // --- Start Server ---
 app.listen(PORT, () => {
