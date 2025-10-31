@@ -22,6 +22,7 @@ const allowedOrigins = [
 // ---------------------------
 const corsOptions = {
   origin: (origin, callback) => {
+    // allow requests with no origin (mobile apps, curl, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -31,11 +32,14 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  credentials: true,
 };
 
+// Use CORS middleware globally
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // handle preflight requests
+
+// Handle preflight requests for all routes
+app.options("*", cors(corsOptions));
 
 // ---------------------------
 // ✅ Body Parser
@@ -55,7 +59,7 @@ mongoose
 // ---------------------------
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true }, // hash in production
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
