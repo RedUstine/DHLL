@@ -6,15 +6,20 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ---------------------------
+// ✅ Frontend Build Path
+// ---------------------------
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 // ---------------------------
 // ✅ Allowed Origins
 // ---------------------------
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://dhll-1.onrender.com",
-  "https://dhll-nobx.onrender.com"
+  "http://localhost:3000",                  // Local dev
+  "https://dhll-1.onrender.com",            // Frontend Render URL
+  "https://dhll-nobx.onrender.com",         // Optional second frontend
+  "https://dhll-frontend.onrender.com"      // Replace with your actual frontend URL
 ];
 
 // ---------------------------
@@ -22,7 +27,6 @@ const allowedOrigins = [
 // ---------------------------
 const corsOptions = {
   origin: (origin, callback) => {
-    // allow requests with no origin (mobile apps, curl, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -35,11 +39,8 @@ const corsOptions = {
   credentials: true,
 };
 
-// Use CORS middleware globally
 app.use(cors(corsOptions));
-
-// Handle preflight requests for all routes
-app.options("*", cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight
 
 // ---------------------------
 // ✅ Body Parser
@@ -57,10 +58,13 @@ mongoose
 // ---------------------------
 // ✅ User Model
 // ---------------------------
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // hash in production
-}, { timestamps: true });
+const userSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }, // hash in production
+  },
+  { timestamps: true }
+);
 
 const User = mongoose.model("User", userSchema);
 
@@ -73,7 +77,9 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res.status(400).json({ success: false, message: "Email and password required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password required" });
 
     let user = await User.findOne({ email });
 
@@ -82,13 +88,15 @@ app.post("/login", async (req, res) => {
       user = await User.create({ email, password });
       console.log("🆕 New user created:", email);
     } else if (user.password !== password) {
-      return res.status(401).json({ success: false, message: "Invalid password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
     }
 
     res.json({
       success: true,
       message: "Login successful",
-      user: { id: user._id, email: user.email }
+      user: { id: user._id, email: user.email },
     });
   } catch (err) {
     console.error("❌ Server error:", err);
