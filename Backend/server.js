@@ -4,44 +4,36 @@ const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config();
 const app = express();
-const PORT = process.env.PORT || 1000;
+const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 
 
-
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   if (req.method === "OPTIONS") return res.sendStatus(200);
-//   next();
-// });
-
-// ✅ Unified CORS Setup — handles everything globally
 const allowedOrigins = [
-  "https://dhll-1.onrender.com", // deployed frontend
-  "http://localhost:3000"        // local dev
+  "https://dhll-1.onrender.com",
+  "http://localhost:3000"
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+
 
 // 👇 must come BEFORE express.json() and routes
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// app.use(cors(corsOptions));
+// app.options("*", cors(corsOptions));
 
 // ✅ 1. Correct CORS setup
 // const allowedOrigins = [
@@ -65,7 +57,7 @@ app.options("*", cors(corsOptions));
 // }));
 
 // ✅ 2. Handle OPTIONS (preflight) explicitly
-app.options("*", cors());
+// app.options("*", cors());
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     if (!origin || allowedOrigins.includes(origin)) {
@@ -104,6 +96,14 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 const User = mongoose.model("User", userSchema);
+
+// Global CORS preflight handler
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(200);
+});
 
 // -----------------------------------------
 // ✅ API Routes
