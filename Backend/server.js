@@ -11,35 +11,58 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
 
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   if (req.method === "OPTIONS") return res.sendStatus(200);
+//   next();
+// });
 
-
-// ✅ 1. Correct CORS setup
+// ✅ Unified CORS Setup — handles everything globally
 const allowedOrigins = [
-  "https://dhll-1.onrender.com", // ✅ correct frontend (from the error)
-  "http://localhost:3000"        // for local dev
+  "https://dhll-1.onrender.com", // deployed frontend
+  "http://localhost:3000"        // local dev
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-}));
+  credentials: true,
+};
+
+// 👇 must come BEFORE express.json() and routes
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
+// ✅ 1. Correct CORS setup
+// const allowedOrigins = [
+//   "https://dhll-1.onrender.com", // ✅ correct frontend (from the error)
+//   "http://localhost:3000"        // for local dev
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // allow requests with no origin (like mobile apps, curl, etc.)
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true,
+// }));
 
 // ✅ 2. Handle OPTIONS (preflight) explicitly
 app.options("*", cors());
