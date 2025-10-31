@@ -12,43 +12,16 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 // ✅ Allowed Origins
 // ---------------------------
 const allowedOrigins = [
-  "http://localhost:3000",               // local dev
-  "https://dhll-1.onrender.com",         // first deployed frontend
-  "https://dhll-nobx.onrender.com"       // second deployed frontend
+  "http://localhost:3000",
+  "https://dhll-1.onrender.com",
+  "https://dhll-nobx.onrender.com"
 ];
 
 // ---------------------------
 // ✅ CORS Middleware
 // ---------------------------
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     // allow requests with no origin (mobile apps, Postman, curl)
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-//   credentials: true
-// }));
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     // allow requests with no origin (mobile apps, curl, Postman)
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-//   credentials: true,
-// };
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
-    // allow requests with no origin (mobile apps, Postman, curl)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -59,33 +32,10 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
-}));
-
-// Global preflight handler
-app.options("*", cors({
-  origin: allowedOrigins,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"],
-  credentials: true
-}));
-
+};
 
 app.use(cors(corsOptions));
-
-// Handle preflight OPTIONS requests globally
-app.options("*", (req, res) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(200);
-});
-
-// Handle preflight OPTIONS requests globally
-// app.options("*", cors());
+app.options("*", cors(corsOptions)); // handle preflight requests
 
 // ---------------------------
 // ✅ Body Parser
@@ -105,7 +55,7 @@ mongoose
 // ---------------------------
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // hash in production
+  password: { type: String, required: true },
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
