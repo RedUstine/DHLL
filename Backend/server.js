@@ -1,18 +1,24 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
-
+require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 1000;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 
-// -----------------------------------------
-// ✅ CORS Configuration
-// -----------------------------------------
+
+
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
 
 // ✅ 1. Correct CORS setup
 const allowedOrigins = [
@@ -29,9 +35,10 @@ app.use(cors({
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
+
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
 }));
 
 // ✅ 2. Handle OPTIONS (preflight) explicitly
@@ -49,10 +56,6 @@ app.options("*", cors());
 //   allowedHeaders: ["Content-Type", "Authorization"],
 //   credentials: true,
 // }));
-
-// ✅ Explicitly handle preflight OPTIONS requests
-app.options("*", cors());
-
 // -----------------------------------------
 // ✅ Middleware
 // -----------------------------------------
