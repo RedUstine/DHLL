@@ -17,9 +17,8 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
 // ---------------------------
 const allowedOrigins = [
   "http://localhost:3000",                  // Local dev
-  "https://dhll-1.onrender.com",            // Frontend Render URL
-  "https://dhll-nobx.onrender.com",         // Optional second frontend
-  "https://dhll-frontend.onrender.com"      // Replace with your actual frontend URL
+  // "https://dhll-xnuy.onrender.com",         //  backend
+  "https://dhll-1.onrender.com"      // Replace with your actual frontend URL
 ];
 
 // ---------------------------
