@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./App.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"  || "https://dhll-backend.onrender.com";
-
+// ✅ Use only one fallback
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 
 const DHLLoginPage = () => {
