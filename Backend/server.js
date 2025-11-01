@@ -11,7 +11,12 @@ const PORT = process.env.PORT || 5000;
 // ✅ Frontend Build Path
 // ---------------------------
 const frontendBuildPath = path.join(__dirname, "..", "Frontend", "build");
+// Serve frontend
+app.use(express.static(path.join(__dirname, "Frontend/build")));
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "Frontend/build", "index.html"));
+});
 // ---------------------------
 // ✅ Allowed Origins
 // ---------------------------
