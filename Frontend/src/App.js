@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"  || "https://dhll-backend.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"  || "https://dhll-backend.onrender.com";
 
 
 
@@ -30,7 +30,7 @@ const DHLLoginPage = () => {
   setIsLoading(true);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
