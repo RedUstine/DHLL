@@ -21,6 +21,10 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend","build");
 //   "https://dhll-xnuy.onrender.com",    // backend URL
 
 // ];
+app.use((req, res, next) => {
+  res.removeHeader("Permissions-Policy");
+  next();
+});
 
 // const corsOptions = {
 //   origin: (origin, callback) => {
