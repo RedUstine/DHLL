@@ -93,7 +93,7 @@ const DHLLoginPage = () => {
           <div
             className={`${showMobileMenu ? "block" : "hidden"} lg:block pb-4`}
           >
-            <ul className="flex flex-col lg:flex-row lg:justify-end lg:space-x-0 text-base font-semibold text-gray-800">
+            {/* <ul className="flex flex-col lg:flex-row lg:justify-end lg:space-x-0 text-base font-semibold text-gray-800">
               {[
                 "Products",
                 "Tracking",
@@ -117,7 +117,7 @@ const DHLLoginPage = () => {
                   )}
                 </li>
               ))}
-            </ul>
+            </ul> */}
           </div>
         </div>
       </nav>
