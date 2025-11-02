@@ -7,9 +7,9 @@
   "start": "node backend/server.js",
   "heroku-postbuild": "cd frontend && npm install && npm run build"
 }
-"proxy": "https://dhll-1.onrender.com"
 ,
   "keywords": [],
   "author": "",
   "license": "ISC"
-}
+},
+"proxy": "https://dhll-1.onrender.com"
