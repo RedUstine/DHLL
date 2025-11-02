@@ -15,26 +15,50 @@ const frontendBuildPath = path.join(__dirname, "..", "Frontend","build");
 // ---------------------------
 // ✅ CORS Setup
 // ---------------------------
+// const allowedOrigins = [
+//   "http://localhost:3000",
+//    "https://dhll-1.onrender.com",//frontend
+//   "https://dhll-xnuy.onrender.com",    // backend URL
+
+// ];
+
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       console.log("Blocked by CORS:", origin);
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//   credentials: true
+// };
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://dhll-1.onrender.com",      // frontend URL
-  "https://dhll-xnuy.onrender.com"    // backend URL
+  /^https:\/\/[\w-]+\.onrender\.com$/,  // ✅ Fixed regex
 ];
-
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      } else if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    })) {
       callback(null, true);
     } else {
       console.log("Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-};
-
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+   allowedHeaders: ["Content-Type", "Authorization"],
+   credentials: true
+}
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
